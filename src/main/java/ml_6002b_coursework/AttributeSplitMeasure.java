@@ -36,5 +36,9 @@ public abstract class AttributeSplitMeasure {
 
         return splitData;
     }
+    public Instances[] splitDataOnNumeric(Instances data, Attribute att){
+        Instances[] splitData = new Instances[att.numValues()];
+        return splitData;
+    }
 
 }
