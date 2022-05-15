@@ -1,9 +1,11 @@
 package ml_6002b_coursework;
 
+import experiments.data.DatasetLoading;
 import org.checkerframework.checker.units.qual.C;
 import weka.classifiers.AbstractClassifier;
 import weka.core.*;
 
+import java.io.FileReader;
 import java.util.Arrays;
 
 /**
@@ -265,8 +267,9 @@ public class CourseworkTree extends AbstractClassifier {
      * @param args the options for the classifier main
      */
     public static void main(String[] args) throws Exception {
-        System.out.println("Not Implemented.");
+        FileReader optdigits = new FileReader("src/main/java/ml_6002b_coursework/test_data/optdigits.arff");
+
         CourseworkTree tree = new CourseworkTree();
-        tree.setOptions(new String[]{"-split","aa"});
+        tree.setOptions(new String[]{"-split","ig"});
     }
 }

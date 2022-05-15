@@ -3,7 +3,8 @@ package ml_6002b_coursework;
 import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
 import weka.core.Instances;
-
+import weka.filters.unsupervised.attribute.RandomSubset;
+import java.io.FileReader;
 import java.util.Random;
 
 public class TreeEnsemble extends AbstractClassifier {
@@ -14,18 +15,30 @@ public class TreeEnsemble extends AbstractClassifier {
 
     @Override
     public void buildClassifier(Instances data) throws Exception {
-        trees = new CourseworkTree[50];
-
-
-
-
-        //Randomise split criterion for each tree
         Random random = new Random();
         String[] split = new String[]{"ig","igratio","chi","gini"};
-        for (CourseworkTree tree : trees){
-            int rand = random.nextInt();
+        trees = new CourseworkTree[numTrees];
+        RandomSubset filter = new RandomSubset();
+        Instances instToFilter = data;
+        for (int i = 0; i < trees.length; i++){
+            //Random subset of attributes
+            trees[i] = new CourseworkTree();
+            int seed = random.nextInt();
+            filter.setSeed(seed);
+            filter.setNumAttributes(0.5);// 50% of attributes
+            filter.setInputFormat(instToFilter);
+            //System.out.println(data);
+            Instances inst = filter.process(instToFilter);
+            //System.out.println(inst);
+
+            //Randomise split criterion for each tree
+            int rand = Math.abs(random.nextInt());
+            System.out.println(rand);
             int select = rand%4;
-            tree.setOptions(new String[]{"-split",split[select]});
+            //System.out.println(select);
+            String[] options = new String[]{"-split",split[select]};
+            trees[i].setOptions(options);
+            instToFilter = inst;
         }
     }
 
@@ -88,5 +101,16 @@ public class TreeEnsemble extends AbstractClassifier {
             }
             return dist;
         }
+    }
+
+    public static void main(String[] args) throws Exception {
+        FileReader optdigits = new FileReader("src/main/java/ml_6002b_coursework/test_data/optdigits.arff");
+        FileReader chinatown = new FileReader("src/main/java/ml_6002b_coursework/test_data/Chinatown.arff");
+
+
+        Instances inst = new Instances(optdigits);
+        inst.setClassIndex(inst.numAttributes()-1);
+        TreeEnsemble ensemble = new TreeEnsemble();
+        ensemble.buildClassifier(inst);
     }
 }
