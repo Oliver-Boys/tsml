@@ -13,8 +13,6 @@ public class AttributeMeasures {
      * @param args the options for the attribute measure main
      */
     public static void main(String[] args) {
-        System.out.println("Not Implemented.");
-
         int[][] peatyArray = new int[][]{
                 {4,0},
                 {1,5}
@@ -110,20 +108,20 @@ public class AttributeMeasures {
 
         double[][] expected = new double[array.length][array[0].length];
         for (int i = 0; i < array.length; i++){
-            for (int j = 0; j < array.length; j++){
+            for (int j = 0; j < array[i].length; j++){
                 count += array[i][j];
                 casesAtEach[i] += array[i][j];
                 classDist[j] += array[i][j];
             }
         }
         for (int i = 0; i < array.length; i++){
-            for (int j = 0; j < array.length; j++){
+            for (int j = 0; j < array[i].length; j++){
                 expected[i][j] = casesAtEach[i] * ((double)classDist[j]/count);
             }
         }
         double chi2 = 0;
         for (int i = 0; i < array.length; i++){
-            for (int j = 0; j < array.length; j++){
+            for (int j = 0; j < array[i].length; j++){
                 chi2 += Math.pow(array[i][j] - expected[i][j], 2)/expected[i][j];
             }
         }

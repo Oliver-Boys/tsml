@@ -1,6 +1,10 @@
 package ml_6002b_coursework;
 
+import org.checkerframework.checker.units.qual.A;
+import org.w3c.dom.Attr;
+import scala.Int;
 import weka.core.Attribute;
+import weka.core.AttributeStats;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -27,7 +31,7 @@ public abstract class AttributeSplitMeasure {
         }
 
         for (Instance inst: data) {
-            splitData[(int) inst.value(att)].add(inst);
+            splitData[(int) inst.value(att.index())].add(inst);
         }
 
         for (Instances split : splitData) {
@@ -37,7 +41,26 @@ public abstract class AttributeSplitMeasure {
         return splitData;
     }
     public Instances[] splitDataOnNumeric(Instances data, Attribute att){
-        Instances[] splitData = new Instances[att.numValues()];
+        Instances[] splitData = new Instances[2];
+        splitData[0] = new Instances(data,0);
+        splitData[1] = new Instances(data, 0);
+        //System.out.println(splitData[0]);
+        AttributeStats stats = data.attributeStats(att.index());
+        double min = stats.numericStats.min;
+        double max = stats.numericStats.max;
+        double mean = stats.numericStats.mean;
+        //System.out.println("mean" + mean);
+        for(int i = 0; i < data.numInstances(); i++){
+            //System.out.println(i);
+            //System.out.println(data.instance(i).value(att));
+            if (data.instance(i).value(att) <= mean){
+                splitData[0].add(data.instance(i));
+            }else{
+                splitData[1].add(data.instance(i));
+            }
+        }
+        //System.out.println(splitData[0].size());
+        //System.out.println(splitData[1].size());
         return splitData;
     }
 

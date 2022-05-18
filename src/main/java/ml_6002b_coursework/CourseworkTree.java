@@ -2,6 +2,7 @@ package ml_6002b_coursework;
 
 import experiments.data.DatasetLoading;
 import org.checkerframework.checker.units.qual.C;
+import utilities.ClassifierTools;
 import weka.classifiers.AbstractClassifier;
 import weka.core.*;
 
@@ -21,6 +22,8 @@ public class CourseworkTree extends AbstractClassifier {
 
     /** The root node of the tree. */
     private TreeNode root;
+
+    private double mean;
 
     /**
      * Sets the attribute split measure for the classifier.
@@ -43,8 +46,8 @@ public class CourseworkTree extends AbstractClassifier {
 
     @Override
     public void setOptions(String[] options) throws Exception {
-        System.out.println(Arrays.toString(options));
-        String s = Utils.getOption("split", options).toLowerCase();
+        //System.out.println(Arrays.toString(options));
+        String s = weka.core.Utils.getOption("split", options).toLowerCase();
         if (s.equals("ig")){
             attSplitMeasure = new IGAttributeSplitMeasure(false);
         }else if (s.equals("igratio")){
@@ -70,6 +73,7 @@ public class CourseworkTree extends AbstractClassifier {
 
         // attributes
         result.enable(Capabilities.Capability.NOMINAL_ATTRIBUTES);
+        result.enable(Capabilities.Capability.NUMERIC_ATTRIBUTES);
 
         // class
         result.enable(Capabilities.Capability.NOMINAL_CLASS);
@@ -90,7 +94,8 @@ public class CourseworkTree extends AbstractClassifier {
         if (data.classIndex() != data.numAttributes() - 1) {
             throw new Exception("Class attribute must be the last index.");
         }
-
+        //maxDepth = 2;
+        //System.out.println(maxDepth);
         root = new TreeNode();
         root.buildTree(data, 0);
     }
@@ -169,7 +174,13 @@ public class CourseworkTree extends AbstractClassifier {
 
             // If we found an attribute to split on, create child nodes.
             if (bestSplit != null) {
-                Instances[] split = attSplitMeasure.splitData(data, bestSplit);
+                Instances[] split;
+                if (bestSplit.isNumeric()){
+                    mean = data.attributeStats(bestSplit.index()).numericStats.mean;
+                    split = attSplitMeasure.splitDataOnNumeric(data, bestSplit);
+                }else{
+                    split = attSplitMeasure.splitData(data, bestSplit);
+                }
                 children = new TreeNode[split.length];
 
                 // Create a child for each value in the selected attribute, and determine whether it is a leaf or not.
@@ -215,6 +226,11 @@ public class CourseworkTree extends AbstractClassifier {
             if (bestSplit == null) {
                 return leafDistribution;
             } else {
+                //System.out.println(inst.value(bestSplit));
+                //System.out.println(children.length);
+                if (bestSplit.isNumeric()){
+                    return children[(inst.value(bestSplit)>mean)?1:0].distributionForInstance(inst);
+                }
                 return children[(int) inst.value(bestSplit)].distributionForInstance(inst);
             }
         }
@@ -268,8 +284,65 @@ public class CourseworkTree extends AbstractClassifier {
      */
     public static void main(String[] args) throws Exception {
         FileReader optdigits = new FileReader("src/main/java/ml_6002b_coursework/test_data/optdigits.arff");
+        FileReader chinatown = new FileReader("src/main/java/ml_6002b_coursework/test_data/Chinatown.arff");
+        Instances inst = new Instances(optdigits);
+        Instances[] trainTest = Utils.splitData(inst, 0.5);
+        //System.out.println("here");
+        trainTest[0].setClassIndex(trainTest[0].numAttributes()-1);
+        trainTest[1].setClassIndex(trainTest[1].numAttributes()-1);
 
         CourseworkTree tree = new CourseworkTree();
+
+
+        //optdigits
         tree.setOptions(new String[]{"-split","ig"});
+        tree.buildClassifier(trainTest[0]);
+        double acc = ClassifierTools.accuracy(trainTest[1], tree);
+        System.out.println("DT using measure Information Gain on optdigits problem has test accuracy = " + acc);
+
+        tree.setOptions(new String[]{"-split","igratio"});
+        tree.buildClassifier(trainTest[0]);
+        acc = ClassifierTools.accuracy(trainTest[1], tree);
+        System.out.println("DT using measure Information Gain Ratio on optdigits problem has test accuracy = " + acc);
+
+        tree.setOptions(new String[]{"-split","chi"});
+        tree.buildClassifier(trainTest[0]);
+        acc = ClassifierTools.accuracy(trainTest[1], tree);
+        System.out.println("DT using measure Chi on optdigits problem has test accuracy = " + acc);
+
+        tree.setOptions(new String[]{"-split","gini"});
+        tree.buildClassifier(trainTest[0]);
+        acc = ClassifierTools.accuracy(trainTest[1], tree);
+        System.out.println("DT using measure Gini on optdigits problem has test accuracy = " + acc);
+
+
+
+        //Chinatown
+
+        inst = new Instances(chinatown);
+        trainTest = Utils.splitData(inst, 0.5);
+        trainTest[0].setClassIndex(trainTest[0].numAttributes()-1);
+        trainTest[1].setClassIndex(trainTest[1].numAttributes()-1);
+
+        tree.setOptions(new String[]{"-split","ig"});
+        tree.buildClassifier(trainTest[0]);
+        acc = ClassifierTools.accuracy(trainTest[1], tree);
+        System.out.println("\n\nDT using measure Information Gain on Chinatown problem has test accuracy = " + acc);
+
+        tree.setOptions(new String[]{"-split","igratio"});
+        tree.buildClassifier(trainTest[0]);
+        acc = ClassifierTools.accuracy(trainTest[1], tree);
+        System.out.println("DT using measure Information Gain Ratio on Chinatown problem has test accuracy = " + acc);
+
+        tree.setOptions(new String[]{"-split","chi"});
+        tree.buildClassifier(trainTest[0]);
+        acc = ClassifierTools.accuracy(trainTest[1], tree);
+        System.out.println("DT using measure Chi on Chinatown problem has test accuracy = " + acc);
+
+        tree.setOptions(new String[]{"-split","gini"});
+        tree.buildClassifier(trainTest[0]);
+        acc = ClassifierTools.accuracy(trainTest[1], tree);
+        System.out.println("DT using measure Gini on Chinatown problem has test accuracy = " + acc);
+
     }
 }

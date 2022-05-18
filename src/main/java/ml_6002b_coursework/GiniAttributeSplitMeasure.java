@@ -8,8 +8,16 @@ import java.io.FileReader;
 public class GiniAttributeSplitMeasure extends AttributeSplitMeasure{
     @Override
     public double computeAttributeQuality(Instances data, Attribute att) throws Exception {
-        Instances[] instArr = splitData(data, att);
-        int[][] arr = new int[att.numValues()][data.numClasses()];
+        Instances[] instArr;
+        int[][] arr;
+        if (att.isNumeric()){
+            instArr = splitDataOnNumeric(data, att);
+            arr  = new int[2][data.numClasses()];
+        }else{
+            instArr = splitData(data, att);
+            arr  = new int[att.numValues()][data.numClasses()];
+        }
+
         for (int i = 0; i < instArr.length; i++){
             for (int j = 0; j < instArr[i].size(); j++){
                 arr[i][(int) instArr[i].instance(j).classValue()]++;
