@@ -20,9 +20,22 @@ public class TreeEnsemble extends AbstractClassifier {
 
     CourseworkTree[] trees;
     int[] seeds;
-    int numTrees = 2;
+    int numTrees = 50;
     boolean averageDistributions = false;
     double attributeSubSamplePercent = 0.5;
+
+    @Override
+    public void setOptions(String[] options) throws Exception {
+        String s = weka.core.Utils.getOption('S', options).toLowerCase();
+        if (!s.equals(""))
+            attributeSubSamplePercent = Double.parseDouble(s);
+
+        String t = weka.core.Utils.getOption('T', options).toLowerCase();
+        if (!t.equals(""))
+            numTrees = Integer.parseInt(t);
+
+        super.setOptions(options);
+    }
 
     @Override
     public void buildClassifier(Instances data) throws Exception {
@@ -31,7 +44,7 @@ public class TreeEnsemble extends AbstractClassifier {
         trees = new CourseworkTree[numTrees];
         seeds = new int[numTrees];
         RandomSubset filter = new RandomSubset();
-        filter.setNumAttributes(attributeSubSamplePercent*data.numAttributes());// 50% of attributes
+        filter.setNumAttributes(attributeSubSamplePercent*data.numAttributes());// no. of attributes
 
         //filter.setOptions(new String[]{"-V"});
         //Instances instToFilter = data;
@@ -71,7 +84,7 @@ public class TreeEnsemble extends AbstractClassifier {
     @Override
     public double classifyInstance(Instance instance) throws Exception {
         RandomSubset filter = new RandomSubset();
-        filter.setNumAttributes(attributeSubSamplePercent*instance.numAttributes());// 50% of attributes
+        filter.setNumAttributes(attributeSubSamplePercent*instance.numAttributes());// no. of attributes
 
         //Instances instances = new Instances(null);
 
@@ -126,7 +139,7 @@ public class TreeEnsemble extends AbstractClassifier {
     @Override
     public double[] distributionForInstance(Instance instance) throws Exception {
         RandomSubset filter = new RandomSubset();
-        filter.setNumAttributes(attributeSubSamplePercent*instance.numAttributes());// 50% of attributes
+        filter.setNumAttributes(attributeSubSamplePercent*instance.numAttributes());// no. of attributes
         if (!averageDistributions){
             double[] dist = new double[instance.numClasses()];
             for (int i = 0; i < trees.length; i++){
