@@ -34,6 +34,8 @@ public class TreeEnsemble extends AbstractClassifier {
         if (!t.equals(""))
             numTrees = Integer.parseInt(t);
 
+        averageDistributions = weka.core.Utils.getFlag('A', options);
+
         super.setOptions(options);
     }
 

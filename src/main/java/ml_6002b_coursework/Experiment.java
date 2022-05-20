@@ -15,6 +15,8 @@ import weka.classifiers.trees.Id3;
 import weka.classifiers.trees.J48;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Instances;
+import weka.filters.Filter;
+import weka.filters.supervised.attribute.Discretize;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -68,17 +70,24 @@ public class Experiment {
         classifiers1[5] = new J48();
         classifiers1[6] = new TreeEnsemble();
         classifiers1[7] = new TreeEnsemble();
-        
+
+        //Discretize filter = new Discretize();
 
         classifiers1[6].setOptions(new String[]{"-S","0.5"});
         classifiers1[7].setOptions(new String[]{"-S","1"});
-        for (int k = 0; k < 50; k++){
+        for (int k = 0; k < 500; k++){
             System.out.println(k);
             for (int i = 0; i < 1; i++){
                 System.out.println(i);
                 //Instances inst = DatasetLoading.loadData("E:\\MachineLearningData\\UCI Discrete\\UCI Discrete\\" + datasets[i] + "\\" + datasets[i]);
                 Instances train = DatasetLoading.loadData("E:\\MachineLearningData\\Car\\Car_TRAIN");
                 Instances test = DatasetLoading.loadData("E:\\MachineLearningData\\Car\\Car_TEST");
+
+                //filter.setInputFormat(train);
+
+                //Instances trainFiltered = Filter.useFilter(train, filter);
+                //Instances testFiltered = Filter.useFilter(test, filter);
+
                 //Instances[] trainTest = Utils.splitData(inst, 0.5);
                 //trainTest[0].setClassIndex(trainTest[0].numAttributes() - 1);
                 //trainTest[1].setClassIndex(trainTest[1].numAttributes() - 1);
@@ -105,6 +114,8 @@ public class Experiment {
                         timeTest[i][j] /=2;
                         ram[i][j] /=2;
                     }
+
+                    System.out.println(classifiers1[j].getClass().getName() + " | " + Arrays.deepToString(Utils.confusionMatrix(classifiers1[j], test)));
                 }
 
                 /*for (int j = 0; j < classifiers.length; j++){
